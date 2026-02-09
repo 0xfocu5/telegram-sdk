@@ -9,14 +9,14 @@ import (
 )
 
 // SendMessage sends a text message to a chat, optionally with an inline keyboard.
-func (b *Bot) SendMessage(text string, chatID int64, replyToMsgID int, keyboards ...tgbotapi.InlineKeyboardMarkup) (tgbotapi.Message, error) {
+func (b *Bot) SendMessage(text string, chatID int64, replyToMsgID int, disableWebPagePreview bool, keyboards ...tgbotapi.InlineKeyboardMarkup) (tgbotapi.Message, error) {
 	if b.API == nil {
 		return tgbotapi.Message{}, fmt.Errorf("bot API is nil")
 	}
 
 	msg := tgbotapi.NewMessage(chatID, text)
 	msg.ParseMode = tgbotapi.ModeMarkdown
-	msg.DisableWebPagePreview = true
+	msg.DisableWebPagePreview = disableWebPagePreview
 	if replyToMsgID != 0 {
 		msg.ReplyToMessageID = replyToMsgID
 	}
@@ -103,7 +103,7 @@ func (b *Bot) DeleteMessageAfter(chatID int64, messageID int, seconds int) {
 
 // SendMessageAndDelete sends a message and deletes it after a delay.
 func (b *Bot) SendMessageAndDelete(text string, chatID int64, seconds int) {
-	msg, err := b.SendMessage(text, chatID, 0)
+	msg, err := b.SendMessage(text, chatID, 0, true)
 	if err != nil {
 		log.Printf("Failed to send message to be deleted: %v", err)
 		return
@@ -112,14 +112,14 @@ func (b *Bot) SendMessageAndDelete(text string, chatID int64, seconds int) {
 }
 
 // EditMessage edits the text of a message.
-func (b *Bot) EditMessage(chatID int64, messageID int, text string) error {
+func (b *Bot) EditMessage(chatID int64, messageID int, text string, disableWebPagePreview bool) error {
 	if b.API == nil {
 		return fmt.Errorf("bot API is nil")
 	}
 
 	edit := tgbotapi.NewEditMessageText(chatID, messageID, text)
 	edit.ParseMode = tgbotapi.ModeMarkdown
-	edit.DisableWebPagePreview = true
+	edit.DisableWebPagePreview = disableWebPagePreview
 	_, err := b.API.Send(edit)
 	return err
 }
